@@ -200,6 +200,9 @@ class QuestRightArmLeapModule(QuestRobotModule):
             data_list = [float(data) for data in data_string_]
             wrist_tf = np.array(data_list[:7])
             head_tf = np.array(data_list[7:])
+
+            print(f"{wrist_tf=}, {head_tf=}")
+            exit()
             rel_wrist_pos, rel_wrist_rot = self.compute_rel_transform(wrist_tf)
             rel_head_pos, rel_head_rot = self.compute_rel_transform(head_tf)
             if self.data_dir is None and data_string[0] == "Y":

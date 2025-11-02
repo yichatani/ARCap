@@ -1,3 +1,4 @@
+import os
 import socket
 import time
 from argparse import ArgumentParser
@@ -16,7 +17,7 @@ if __name__ == "__main__":
     parser.add_argument("--handedness", type=str, default="right")
     parser.add_argument("--no_camera", action="store_true", default=False)
     args = parser.parse_args()
-    if not os.path.isdir("data")
+    if not os.path.isdir("data"):
         os.mkdir("data")
     
     c = pb.connect(pb.DIRECT)
@@ -24,9 +25,9 @@ if __name__ == "__main__":
     c_code = c_code = [[1,0,0,1], [0,1,0,1], [0,0,1,1], [1,1,0,1]]
     for i in range(4):
         vis_sp.append(create_primitive_shape(pb, 0.1, pb.GEOM_SPHERE, [0.02], color=c_code[i]))
-    if not args.no_camera:
-        camera = DepthCameraModule(is_decimate=False, visualize=False)
-    rokoko = RokokoModule(VR_HOST, HAND_INFO_PORT, ROKOKO_PORT)
+    # if not args.no_camera:
+    #     camera = DepthCameraModule(is_decimate=False, visualize=False)
+    # rokoko = RokokoModule(VR_HOST, HAND_INFO_PORT, ROKOKO_PORT)
     if args.handedness == "right":
         quest = QuestRightArmLeapModule(VR_HOST, LOCAL_HOST, POSE_CMD_PORT, IK_RESULT_PORT, vis_sp=None)
     else:
@@ -45,11 +46,13 @@ if __name__ == "__main__":
         else:
             current_ts = now
         try:
-            if not args.no_camera:
-                point_cloud = camera.receive()
-            left_positions, right_positions = rokoko.receive()
-            rokoko.send_joint_data(np.vstack([left_positions[:5], right_positions[:5]]))
+            # if not args.no_camera:
+            #     point_cloud = camera.receive()
+            # left_positions, right_positions = rokoko.receive()
+            # rokoko.send_joint_data(np.vstack([left_positions[:5], right_positions[:5]]))
             wrist, head_pose= quest.receive()
+            print(f"{wrist=},{head_pose=}")
+            exit()
             if wrist is not None:
                 wrist_orn = Rotation.from_quat(wrist[1])
                 wrist_pos = wrist[0]
@@ -76,15 +79,18 @@ if __name__ == "__main__":
                                                                                 left_arm_q=arm_q, left_hand_q=action, raw_hand_q=hand_q,
                                                                                 left_tip_poses=hand_tip_pose, point_cloud=point_cloud)
         except socket.error as e:
+            print("1")
             print(e)
             pass
         except KeyboardInterrupt:
+            print("2")
             if not args.no_camera:
                 camera.close()
             rokoko.close()
             quest.close()
             break
         else:
+            print("3")
             packet_time = time.time()
             fps_counter += 1
             packet_counter += 1

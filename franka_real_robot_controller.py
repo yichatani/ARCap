@@ -202,7 +202,11 @@ class FrankaRealRobotController:
                 joint_positions = limited_positions
 
             # 读取机器人状态(同步控制循环)
-            _, _ = self.active_control.readOnce()
+            robot_state, _ = self.active_control.readOnce()
+
+            # 缓存O_T_EE和末端位置（供工作空间检查使用）
+            self._last_O_T_EE = np.array(robot_state.O_T_EE).reshape(4, 4)
+            self._last_ee_pos = self._last_O_T_EE[:3, 3]
 
             # 创建关节位置命令
             joint_cmd = JointPositions(joint_positions.tolist())
@@ -271,25 +275,20 @@ class FrankaRealRobotController:
     
     def get_end_effector_position(self, joint_positions):
         """
-        获取末端执行器位置
+        获取末端执行器位置（使用缓存的O_T_EE，避免并发冲突）
 
         Args:
             joint_positions: 7个关节角度 (弧度)
         Returns:
             ee_pos: 末端执行器位置 [x, y, z]
         """
-        try:
-            pose = self.model.pose(joint_positions)
-            # pose是4x4矩阵，位置在第4列（索引3）的前三个元素
-            ee_pos = pose[:3, 3]  # [x, y, z] - 正确的索引方式
-            return ee_pos
-        except Exception as e:
-            print(f"警告: 前向运动学计算失败: {e}")
-            # 读取当前机器人状态
-            state = self.robot.read_once()
-          # O_T_EE是4x4矩阵，位置在第4列的前三个元素
-            ee_pos = np.array([state.O_T_EE[12], state.O_T_EE[13], state.O_T_EE[14]])
-            return ee_pos
+        # 使用缓存的末端位置，避免并发读取问题
+        if hasattr(self, '_last_ee_pos'):
+            return self._last_ee_pos
+        else:
+            # 如果还没有缓存，返回默认安全位置
+            print("警告: 尚无末端位置缓存，返回默认位置")
+            return np.array([0.4, 0.0, 0.4])  # 工作空间中心位置
 
     def trigger_emergency_stop(self, reason):
         """

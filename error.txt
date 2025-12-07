@@ -1,3 +1,6 @@
 启动Franka控制...
 Franka控制错误: libfranka: Move command aborted: motion aborted by reflex! ["joint_position_motion_generator_start_pose_invalid"]
 ^C^\Quit (core dumped)
+警告: 前向运动学计算失败: 'pylibfranka._pylibfranka.Model' object has no attribute 'pose'
+错误：目标位置不安全 - 工作空间检查失败: libfranka robot: Cannot perform this operation while another control or read operation is running.
+^C

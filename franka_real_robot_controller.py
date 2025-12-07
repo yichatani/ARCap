@@ -4,10 +4,10 @@ ARCap + Franka 实机控制版
 
 用法:
     # 右臂Leap Hand + Franka实机
-    python franka_real_robot_controller.py --robot_ip 192.168.1.100
+    python franka_real_robot_controller.py --robot_ip 172.16.0.2
 
     # 左臂Gripper + Franka实机
-    python franka_real_robot_controller.py --robot_ip 192.168.1.100 --handedness left
+    python franka_real_robot_controller.py --robot_ip 172.16.0.2 --handedness left
 """
 
 import os
@@ -36,7 +36,7 @@ class FrankaRealRobotController:
     Franka 实机控制器 - 慢速安全追踪版本
     机械臂会以限制的速度缓慢追踪目标位置，确保运动安全
     """
-    def __init__(self, robot_ip, control_mode="position", frequency=30, max_velocity_deg=10.0):
+    def __init__(self, robot_ip, control_mode="position", frequency=1000, max_velocity_deg=10.0):
         """
         初始化 Franka 控制器
 
@@ -62,12 +62,11 @@ class FrankaRealRobotController:
         self.joint_lower_limits = np.array([-2.7, -1.6, -2.7, -2.9, -2.7, 0.1, -2.7])
         self.joint_upper_limits = np.array([ 2.7,  1.6,  2.7, -0.1,  2.7,  3.6,  2.7])
 
-        # 前方工作空间（只允许机械臂前方区域）
-        self.workspace_x_min = 0.2    # 前方最小距离 0.2m（避免太近）
-        self.workspace_x_max = 0.8    # 前方最大距离 0.7m（严格限制）
-        self.workspace_y_range = 0.3  # 左右范围 ±0.3m
-        self.workspace_z_min = 0.2    # 最低高度 0.2m
-        self.workspace_z_max = 0.4    # 最高高度 0.8m
+        self.workspace_x_min = 0.2 
+        self.workspace_x_max = 0.8  
+        self.workspace_y_range = 0.3 
+        self.workspace_z_min = 0.2  
+        self.workspace_z_max = 0.4  
 
         # 紧急停止标志和速度监控
         self.emergency_stop = False
@@ -148,8 +147,14 @@ class FrankaRealRobotController:
         try:
             joint_positions = np.array(joint_positions)
 
-            # 1. 速度检查（仅在跟随模式下进行）
             if self.following_mode_started:
+                # 安全检查：确保变量已初始化
+                if self.prev_joint_positions is None or self.last_velocity_check_time is None:
+                    print("警告：速度监控变量未初始化，跳过速度检查")
+                    self.prev_joint_positions = joint_positions.copy()
+                    self.last_velocity_check_time = time.time()
+                    return False if self.emergency_stop else True
+
                 current_time = time.time()
                 dt = current_time - self.last_velocity_check_time
                 if dt > 0.001:  # 避免除零
@@ -166,13 +171,11 @@ class FrankaRealRobotController:
             if self.emergency_stop:
                 return False
 
-            # 3. 关节限位和工作空间检查
             is_safe, reason = self.check_safety(joint_positions)
             if not is_safe:
                 self.trigger_emergency_stop(reason)
                 return False
 
-            # 4. 速度限制
             if self.last_joint_positions is not None:
                 # 计算需要移动的距离
                 position_error = joint_positions - self.last_joint_positions
@@ -191,7 +194,6 @@ class FrankaRealRobotController:
                     else:
                         limited_positions[i] = joint_positions[i]
 
-                # 计算实际需要的移动时间（用于调试）
                 max_error = np.max(abs_position_error)
                 estimated_time = max_error / self.max_angular_velocity
                 if estimated_time > 0.5:  # 如果需要超过0.5秒，打印提示
@@ -278,8 +280,8 @@ class FrankaRealRobotController:
         """
         try:
             pose = self.model.pose(joint_positions)
-            # pose是4x4矩阵，位置在最后一列的前三个元素
-            ee_pos = pose[3, :3]  # [x, y, z]
+            # pose是4x4矩阵，位置在第4列（索引3）的前三个元素
+            ee_pos = pose[:3, 3]  # [x, y, z] - 正确的索引方式
             return ee_pos
         except Exception as e:
             print(f"警告: 前向运动学计算失败: {e}")
@@ -324,23 +326,6 @@ class FrankaRealRobotController:
                 print("速度监控基准已重置")
             except Exception as e:
                 print(f"警告：无法重置速度监控基准: {e}")
-
-    def get_current_state(self):
-        """获取当前机器人状态"""
-        if not self.is_connected or self.robot is None:
-            return None
-
-        try:
-            state = self.robot.read_once()
-            return {
-                'q': np.array(state.q),
-                'dq': np.array(state.dq),
-                'tau_J': np.array(state.tau_J),
-                'O_T_EE': np.array(state.O_T_EE).reshape(4, 4)  # 列优先转行优先
-            }
-        except Exception as e:
-            print(f"读取状态失败: {e}")
-            return None
 
 
 def generate_default_hand_positions(handedness="right"):

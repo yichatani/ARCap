@@ -26,6 +26,7 @@ from quest_robot_module import QuestRightArmLeapModule, QuestLeftArmGripperModul
 from franka_real_robot_controller import FrankaRealRobotController, FRANKA_AVAILABLE
 
 # 添加线程安全的终止标志
+global GLOBAL_SHUTDOWN
 GLOBAL_SHUTDOWN = False
 
 
@@ -160,7 +161,7 @@ def main():
         robot_ip=args.robot_ip,
         control_mode="position",
         frequency=1000,  # 1000Hz
-        max_velocity_deg=10.0  # 每秒最大10度，确保安全
+        max_velocity_deg=1.0  # 每秒最大10度，确保安全
     )
 
     if not franka_controller.is_connected:
@@ -326,7 +327,6 @@ def main():
     except KeyboardInterrupt:
         print("\n\n正在关闭...")
         # 设置全局终止标志
-        global GLOBAL_SHUTDOWN
         GLOBAL_SHUTDOWN = True
 
         # 等待Franka线程退出

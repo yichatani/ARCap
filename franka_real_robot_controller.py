@@ -36,7 +36,7 @@ class FrankaRealRobotController:
     Franka 实机控制器 - 慢速安全追踪版本
     机械臂会以限制的速度缓慢追踪目标位置，确保运动安全
     """
-    def __init__(self, robot_ip, control_mode="position", frequency=1000, max_velocity_deg=10.0):
+    def __init__(self, robot_ip, control_mode="position", frequency=1000, max_velocity_deg=20.0):
         """
         初始化 Franka 控制器
 
@@ -96,10 +96,10 @@ class FrankaRealRobotController:
             )
 
             # 设置关节阻抗
-            self.robot.set_joint_impedance([3000.0, 3000.0, 3000.0, 2500.0, 2500.0, 2000.0, 2000.0])
+            self.robot.set_joint_impedance([300.0, 300.0, 300.0, 200.0, 200.0, 200.0, 200.0])
 
             # 设置笛卡尔阻抗
-            self.robot.set_cartesian_impedance([3000.0, 3000.0, 3000.0, 300.0, 300.0, 300.0])
+            self.robot.set_cartesian_impedance([300.0, 300.0, 300.0, 30.0, 30.0, 30.0])
 
             # 读取初始状态
             initial_state = self.robot.read_once()
@@ -183,7 +183,7 @@ class FrankaRealRobotController:
 
                 # 计算每帧允许的最大移动量
                 max_step = self.max_position_per_frame
-
+                print(f"上一帧位置: {np.round(np.rad2deg(self.last_joint_positions), 1)}°")
                 # 对每个关节进行速度限制
                 limited_positions = self.last_joint_positions.copy()
                 for i in range(7):
@@ -198,7 +198,7 @@ class FrankaRealRobotController:
                 estimated_time = max_error / self.max_angular_velocity
                 if estimated_time > 0.5:  # 如果需要超过0.5秒，打印提示
                     print(f"慢速移动中: 需要 {estimated_time:.1f}秒 到达目标位置", end='\r')
-
+                print(f"规划帧位置: {np.round(np.rad2deg(limited_positions), 1)}°")
                 joint_positions = limited_positions
 
             # 读取机器人状态(同步控制循环)
@@ -208,7 +208,8 @@ class FrankaRealRobotController:
             self._last_O_T_EE = np.array(robot_state.O_T_EE).reshape(4, 4)
             # 使用原始数据直接获取末端位置（索引12,13,14）
             self._last_ee_pos = np.array([robot_state.O_T_EE[12], robot_state.O_T_EE[13], robot_state.O_T_EE[14]])
-
+            
+            print(f"dangqian位置: {np.round(np.rad2deg(np.array(robot_state.q)), 1)}°")
             # 创建关节位置命令
             joint_cmd = JointPositions(joint_positions.tolist())
             joint_cmd.motion_finished = motion_finished

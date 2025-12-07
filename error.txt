@@ -1,0 +1,3 @@
+启动Franka控制...
+Franka控制错误: libfranka: Move command aborted: motion aborted by reflex! ["joint_position_motion_generator_start_pose_invalid"]
+^C^\Quit (core dumped)

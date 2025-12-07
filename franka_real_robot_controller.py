@@ -208,6 +208,11 @@ class FrankaRealRobotController:
             self._last_O_T_EE = np.array(robot_state.O_T_EE).reshape(4, 4)
             self._last_ee_pos = self._last_O_T_EE[:3, 3]
 
+            # 调试：打印O_T_EE矩阵
+            print(f"DEBUG O_T_EE矩阵:\n{self._last_O_T_EE}")
+            print(f"DEBUG 末端位置: {self._last_ee_pos}")
+            print(f"DEBUG 原始O_T_EE前16个值: {robot_state.O_T_EE[:16]}")
+
             # 创建关节位置命令
             joint_cmd = JointPositions(joint_positions.tolist())
             joint_cmd.motion_finished = motion_finished

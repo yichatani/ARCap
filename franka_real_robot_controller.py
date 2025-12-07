@@ -66,7 +66,7 @@ class FrankaRealRobotController:
         self.workspace_x_max = 0.8  
         self.workspace_y_range = 0.3 
         self.workspace_z_min = 0.2  
-        self.workspace_z_max = 0.4  
+        self.workspace_z_max = 0.5  
 
         # 紧急停止标志和速度监控
         self.emergency_stop = False
@@ -206,12 +206,8 @@ class FrankaRealRobotController:
 
             # 缓存O_T_EE和末端位置（供工作空间检查使用）
             self._last_O_T_EE = np.array(robot_state.O_T_EE).reshape(4, 4)
-            self._last_ee_pos = self._last_O_T_EE[:3, 3]
-
-            # 调试：打印O_T_EE矩阵
-            print(f"DEBUG O_T_EE矩阵:\n{self._last_O_T_EE}")
-            print(f"DEBUG 末端位置: {self._last_ee_pos}")
-            print(f"DEBUG 原始O_T_EE前16个值: {robot_state.O_T_EE[:16]}")
+            # 使用原始数据直接获取末端位置（索引12,13,14）
+            self._last_ee_pos = np.array([robot_state.O_T_EE[12], robot_state.O_T_EE[13], robot_state.O_T_EE[14]])
 
             # 创建关节位置命令
             joint_cmd = JointPositions(joint_positions.tolist())

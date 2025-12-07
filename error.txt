@@ -4,3 +4,10 @@ Franka控制错误: libfranka: Move command aborted: motion aborted by reflex! [
 警告: 前向运动学计算失败: 'pylibfranka._pylibfranka.Model' object has no attribute 'pose'
 错误：目标位置不安全 - 工作空间检查失败: libfranka robot: Cannot perform this operation while another control or read operation is running.
 ^C
+警告: 尚无末端位置缓存，返回默认位置
+启动Franka控制...
+目标位置: [  -7.2   13.7    1.8 -121.1    5.2  138.4  -45.6]°
+警告: 尚无末端位置缓存，返回默认位置
+慢速移动中: 需要 9.9秒 到达目标位置
+紧急停止! 末端X位置超出前方范围: 0.00m (范围: 0.2m 到 0.8m)
+^C

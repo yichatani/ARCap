@@ -26,13 +26,14 @@ sys.path.insert(0, '/home/ani/ExDex/data_collection/franka_ws/async_pos_ctrl_cpp
 import franka_controller as fc
 from ip_config import *
 from quest_robot_module import QuestRightArmLeapModule, QuestLeftArmGripperModule
+import pybullet as pb
 
 
 def check_workspace_safety(ee_pose_matrix):
     """检查工作空间安全性"""
     position = ee_pose_matrix[:3, 3]
 
-    # 定义安全工作空间（根据您的需求调整）
+    # 定义安全工作空间
     x_min, x_max = 0.4, 0.8    # 前方范围
     y_limit = 0.3              # 左右范围
     z_min, z_max = 0.3, 0.8    # 高度范围
@@ -95,6 +96,8 @@ def main():
     # 创建数据文件夹
     if not os.path.isdir("data"):
         os.mkdir("data")
+
+    pb.connect(pb.DIRECT)
 
     # 配置Franka控制器
     print("正在初始化Franka控制器...")
@@ -264,8 +267,9 @@ def main():
     print("\n停止Franka控制器...")
     controller.stop()
 
-    # 关闭Quest连接
+    # 关闭连接
     quest.close()
+    pb.disconnect()
 
     # 最终状态
     if controller.has_error():

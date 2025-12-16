@@ -156,7 +156,7 @@ def main():
     print("\n本地控制:")
     print("  输入 'start'  - 移动到初始位置")
     print("  输入 'follow' - 开始跟随模式")
-    print("  ���入 'stop'   - 停止机器人")
+    print("  输入 'stop'   - 停止机器人")
     print("  按 Ctrl+C    - 退出程序")
     print("="*70 + "\n")
 
@@ -258,31 +258,43 @@ def main():
             # 维持固定频率
             elapsed_loop = time.time() - loop_start
             sleep_time = max(0, dt - elapsed_loop)
-            time.sleep(sleep_time)
+
+            if sleep_time > 0.01:
+                time.sleep(0.01)
+                sleep_time -= 0.01
+
+            if sleep_time > 0:
+                time.sleep(sleep_time)
 
     except KeyboardInterrupt:
         print("\n\n正在关闭...")
 
-    # 停止控制器
-    print("\n停止Franka控制器...")
-    controller.stop()
+    finally:
+        # 停止控制器
+        print("\n停止Franka控制器...")
+        if controller.is_running():
+            controller.stop()
+        try:
+            quest.close()
+        except:
+            pass
+        try:
+            pb.disconnect()
+        except:
+            pass
 
-    # 关闭连接
-    quest.close()
-    pb.disconnect()
+        # 最终状态
+        if controller.has_error():
+            print(f"控制器错误: {controller.get_error_message()}")
+        else:
+            print(f"\n✓ 程序完成")
+            print(f"  收到数据包: {data_count}")
+            print(f"  控制更新次数: {control_count}")
 
-    # 最终状态
-    if controller.has_error():
-        print(f"控制器错误: {controller.get_error_message()}")
-    else:
-        print(f"\n✓ 程序完成")
-        print(f"  收到数据包: {data_count}")
-        print(f"  控制更新次数: {control_count}")
-
-        # 显示最终状态
-        final_state = controller.get_robot_state()
-        if final_state:
-            print(f"  最终关节位置: {final_state.q}")
+            # 显示最终状态
+            final_state = controller.get_robot_state()
+            if final_state:
+                print(f"  最终关节位置: {final_state.q}")
 
 
 if __name__ == "__main__":

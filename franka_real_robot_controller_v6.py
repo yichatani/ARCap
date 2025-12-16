@@ -1,8 +1,6 @@
 #!/usr/bin/env python3
 """
 ARCap + Franka 实机控制版 V6
-基于test_controller_fixed_rate.py的简洁架构
-使用FrankaAsyncController替代pylibfranka
 
 用法:
   python franka_real_robot_controller_v6.py --robot_ip 172.16.0.2
@@ -28,6 +26,28 @@ sys.path.insert(0, '/home/ani/ExDex/data_collection/franka_ws/async_pos_ctrl_cpp
 import franka_controller as fc
 from ip_config import *
 from quest_robot_module import QuestRightArmLeapModule, QuestLeftArmGripperModule
+
+
+def check_workspace_safety(ee_pose_matrix):
+    """检查工作空间安全性"""
+    position = np.array([ee_pose_matrix[12], ee_pose_matrix[13], ee_pose_matrix[14]])
+
+    # 定义安全工作空间（根据您的需求调整）
+    x_min, x_max = 0.4, 0.8    # 前方范围
+    y_limit = 0.3              # 左右范围
+    z_min, z_max = 0.3, 0.8    # 高度范围
+
+    # 检查边界
+    if position[0] < x_min or position[0] > x_max:
+        return False, f"X位置超出范围: {position[0]:.3f}m (范围: {x_min}-{x_max}m)"
+
+    if abs(position[1]) > y_limit:
+        return False, f"Y位置超出范围: {position[1]:.3f}m (范围: ±{y_limit}m)"
+
+    if position[2] < z_min or position[2] > z_max:
+        return False, f"Z位置超出范围: {position[2]:.3f}m (范围: {z_min}-{z_max}m)"
+
+    return True, ""
 
 
 class GracefulKiller:
@@ -182,6 +202,18 @@ def main():
 
             # 控制逻辑
             if control_enabled and initial_target is not None:
+                state = controller.get_robot_state()
+                # 安全检查
+                if state:
+                    is_safe, warning = check_workspace_safety(state.O_T_EE)
+                    if not is_safe:
+                        print(f"\安全警告: {warning}")
+                        control_enabled = False
+                        following_mode = False
+                        initial_target = None
+                        continue
+
+                # 发送目标
                 if following_mode and last_arm_q is not None:
                     success = controller.set_joint_position_target(last_arm_q)
                 else:
@@ -190,10 +222,9 @@ def main():
                 if success:
                     control_count += 1
 
-                    if args.verbose and control_count % 10 == 0:
-                        state = controller.get_robot_state()
-                        if state:
-                            print(f"\n关节0: {state.q[0]:.4f} rad | 频率: {controller.get_control_frequency():.1f} Hz")
+                    if args.verbose and control_count % 10 == 0 and state:
+                        position = np.array([state.O_T_EE[12], state.O_T_EE[13], state.O_T_EE[14]])
+                        print(f"\n关节0: {state.q[0]:.4f} rad | 位置: [{position[0]:.3f}, {position[1]:.3f}, {position[2]:.3f}] m")
 
             # 检查用户输入
             if sys.stdin in select.select([sys.stdin], [], [], 0)[0]:

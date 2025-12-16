@@ -30,7 +30,7 @@ from quest_robot_module import QuestRightArmLeapModule, QuestLeftArmGripperModul
 
 def check_workspace_safety(ee_pose_matrix):
     """检查工作空间安全性"""
-    position = np.array([ee_pose_matrix[12], ee_pose_matrix[13], ee_pose_matrix[14]])
+    position = ee_pose_matrix[:3, 3]
 
     # 定义安全工作空间（根据您的需求调整）
     x_min, x_max = 0.4, 0.8    # 前方范围
@@ -223,7 +223,7 @@ def main():
                     control_count += 1
 
                     if args.verbose and control_count % 10 == 0 and state:
-                        position = np.array([state.O_T_EE[12], state.O_T_EE[13], state.O_T_EE[14]])
+                        position = state.O_T_EE[:3, 3]
                         print(f"\n关节0: {state.q[0]:.4f} rad | 位置: [{position[0]:.3f}, {position[1]:.3f}, {position[2]:.3f}] m")
 
             # 检查用户输入

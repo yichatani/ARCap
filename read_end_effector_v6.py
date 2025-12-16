@@ -17,7 +17,8 @@ def main():
     if controller.start():
         state = controller.get_robot_state()
         if state:
-            position = np.array([state.O_T_EE[12], state.O_T_EE[13], state.O_T_EE[14]])
+            # state.O_T_EE 是 4x4 numpy 数组
+            position = state.O_T_EE[:3, 3]  # 提取位置
             print(f"{position[0]:.4f} {position[1]:.4f} {position[2]:.4f}")
         controller.stop()
 

@@ -198,6 +198,7 @@ def main():
                     #     print(f"✓ 收到Quest数据: {data_count} 包 | 控制更新: {control_count} 次", end="\r")
 
             except socket.error:
+                print(f"socket error")
                 pass
             except Exception as e:
                 if args.verbose:
@@ -259,12 +260,7 @@ def main():
             elapsed_loop = time.time() - loop_start
             sleep_time = max(0, dt - elapsed_loop)
 
-            if sleep_time > 0.01:
-                time.sleep(0.01)
-                sleep_time -= 0.01
-
-            if sleep_time > 0:
-                time.sleep(sleep_time)
+            time.sleep(sleep_time)
 
     except KeyboardInterrupt:
         print("\n\n正在关闭...")
@@ -287,7 +283,7 @@ def main():
         if controller.has_error():
             print(f"控制器错误: {controller.get_error_message()}")
         else:
-            print(f"\n✓ 程序完成")
+            print(f"\n程序完成")
             print(f"  收到数据包: {data_count}")
             print(f"  控制更新次数: {control_count}")
 

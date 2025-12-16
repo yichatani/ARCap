@@ -196,17 +196,12 @@ def main():
                         last_arm_q = np.array(arm_q[:7])
                         data_count += 1
 
-                    print(f"check 1 success")
                     # 统计
                     # if data_count % 30 == 0:
                     #     print(f"✓ 收到Quest数据: {data_count} 包 | 控制更新: {control_count} 次", end="\r")
 
             except socket.error:
                 pass
-            except OSError as e:
-                # 处理可能的目录创建错误等
-                if args.verbose:
-                    print(f"系统错误: {e}")
             except Exception as e:
                 if args.verbose:
                     print(f"Quest处理错误: {e}")
@@ -266,9 +261,7 @@ def main():
             # 维持固定频率
             elapsed_loop = time.time() - loop_start
             sleep_time = max(0, dt - elapsed_loop)
-            print(f"check 2 success")
             time.sleep(sleep_time)
-            print(f"check 3 success")
 
     except KeyboardInterrupt:
         print("\n\n正在关闭...")

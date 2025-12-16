@@ -97,7 +97,10 @@ def main():
     if not os.path.isdir("data"):
         os.mkdir("data")
 
-    pb.connect(pb.DIRECT)
+    pb_c = pb.connect(pb.DIRECT)
+    if pb_c < 0:
+        print("PyBullet连接失败")
+        sys.exit(1)
 
     # 配置Franka控制器
     print("正在初始化Franka控制器...")
@@ -193,16 +196,20 @@ def main():
                         last_arm_q = np.array(arm_q[:7])
                         data_count += 1
 
+                    print(f"check 1 success")
                     # 统计
                     # if data_count % 30 == 0:
                     #     print(f"✓ 收到Quest数据: {data_count} 包 | 控制更新: {control_count} 次", end="\r")
 
             except socket.error:
-                print(f"socket error")
                 pass
+            except OSError as e:
+                # 处理可能的目录创建错误等
+                if args.verbose:
+                    print(f"系统错误: {e}")
             except Exception as e:
                 if args.verbose:
-                    print(f"Quest数据错误: {e}")
+                    print(f"Quest处理错误: {e}")
 
             # 控制逻辑
             if control_enabled and initial_target is not None:
@@ -259,8 +266,9 @@ def main():
             # 维持固定频率
             elapsed_loop = time.time() - loop_start
             sleep_time = max(0, dt - elapsed_loop)
-
+            print(f"check 2 success")
             time.sleep(sleep_time)
+            print(f"check 3 success")
 
     except KeyboardInterrupt:
         print("\n\n正在关闭...")

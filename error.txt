@@ -31,3 +31,15 @@ swrist_tf=array([-0.6139742, -0.3555208, -0.1351268,  0.3727518, -0.290242 ,
        -0.3581543,  0.8053205]), head_tf=array([-0.01195771, -0.02596431,  0.00097885, -0.06600957, -0.1997584 ,
         0.03265881,  0.9770736 ])
 Error: InMemoryFile::~InMemoryFileIO (numAllocs 74 numFrees 78
+(franka) ani@prosper:~$ cd /home/ani/ARCap-main/data_processing
+(franka) ani@prosper:~/ARCap-main/data_processing$ python read_end_effector_v6.py
+INFO: libfranka: Setting thread priority to the highest possible value.
+Initial joint positions: 0.122496 -0.121757 0.0105935 -1.8224 0.0374558 1.56621 0.493638 
+Traceback (most recent call last):
+  File "/home/ani/ARCap-main/data_processing/read_end_effector_v6.py", line 26, in <module>
+    main()
+  File "/home/ani/ARCap-main/data_processing/read_end_effector_v6.py", line 20, in main
+    position = np.array([state.O_T_EE[12], state.O_T_EE[13], state.O_T_EE[14]])
+IndexError: index 12 is out of bounds for axis 0 with size 4
+INFO: Async position control stopped successfully.
+

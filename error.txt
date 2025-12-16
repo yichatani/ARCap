@@ -65,8 +65,6 @@ Initial joint positions: 0.122716 -0.120049 0.00637499 -1.82334 0.0373087 1.5658
 Quest模块初始化失败: Not connected to physics server.
 INFO: Async position control stopped successfully.
 (franka) ani@prosper:~/ARCap-main/data_processing$ python data_collection_server_no_glove.py
-python: can't open file '/home/ani/ARCap-main/data_processing/data_collection_server_no_glove.py': [Errno 2] No such file or directory
-(franka) ani@prosper:~/ARCap-main/data_processing$ python data_collection_server_no_glove.py
 pybullet build time: Jan 29 2025 23:16:28
 正在初始化PyBullet...
 正在初始化Quest机器人模块 (handedness=right)...

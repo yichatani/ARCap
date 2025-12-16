@@ -43,3 +43,79 @@ Traceback (most recent call last):
 IndexError: index 12 is out of bounds for axis 0 with size 4
 INFO: Async position control stopped successfully.
 
+
+(franka) ani@prosper:~/ARCap-main/data_processing$ python franka_real_robot_controller_v6.py --robot_ip 172.16.0.2
+pybullet build time: Jan 29 2025 23:16:28
+
+======================================================================
+ARCap + Franka
+机器人类型: Leap Hand(灵巧手)
+机器人IP: 172.16.0.2
+Quest IP: 10.195.180.39
+本地IP: 172.16.0.3
+更新频率: 30 Hz
+======================================================================
+
+正在初始化Franka控制器...
+连接Franka机器人 172.16.0.2...
+INFO: libfranka: Setting thread priority to the highest possible value.
+Initial joint positions: 0.122716 -0.120049 0.00637499 -1.82334 0.0373087 1.56581 0.493619 
+
+初始化Quest连接...
+Quest模块初始化失败: Not connected to physics server.
+INFO: Async position control stopped successfully.
+(franka) ani@prosper:~/ARCap-main/data_processing$ python data_collection_server_no_glove.py
+python: can't open file '/home/ani/ARCap-main/data_processing/data_collection_server_no_glove.py': [Errno 2] No such file or directory
+(franka) ani@prosper:~/ARCap-main/data_processing$ python data_collection_server_no_glove.py
+pybullet build time: Jan 29 2025 23:16:28
+正在初始化PyBullet...
+正在初始化Quest机器人模块 (handedness=right)...
+✓ 右臂Leap Hand模块已加载
+✓ 使用默认手指姿态(无手套模式)
+  指尖位置(相对手腕): 
+[[ 0.09  0.02 -0.1 ]
+ [ 0.09 -0.03 -0.1 ]
+ [ 0.09 -0.08 -0.1 ]
+ [ 0.01  0.02 -0.14]]
+
+======================================================================
+  ARCap 极简测试模式 - 只需Quest 3头显
+======================================================================
+
+🤖 机器人类型: Leap Hand(灵巧手)
+📡 Quest IP: 10.195.180.39
+💻 本机 IP: 172.16.0.3
+🔄 更新频率: 30 Hz
+
+⚠️  极简模式(无需手套和相机):
+   ✅ 手臂会完美跟踪你的手腕
+   ✅ AR反馈正常工作(黄色/蓝色警告)
+   ⚠️ 手指保持默认姿态(因为没有手套)
+
+======================================================================
+
+📋 Quest 3操作步骤:
+  1️⃣  启动ARCap应用
+  2️⃣  输入此电脑IP: 172.16.0.3
+  3️⃣  选择机器人类型:
+       👉 按Y键选择Leap Hand
+  4️⃣  放置虚拟机器人基座(用摇杆)
+  5️⃣  按X键保存WorldFrame
+  6️⃣  移动你的手!
+
+🎯 测试项目:
+   ✅ 慢速移动 → 虚拟机器人跟随
+   ✅ 快速移动 → 黄色警告
+   ✅ 靠近障碍 → 蓝色+震动
+   ✅ 按A录制  → 红色边框
+
+按Ctrl+C停止服务器
+======================================================================
+
+^C
+
+正在关闭服务器...
+✓ 服务器已关闭
+Error: InMemoryFile::~InMemoryFileIO (numAllocs 74 numFrees 78
+
+

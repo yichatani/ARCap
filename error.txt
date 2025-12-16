@@ -140,3 +140,50 @@ Error: InMemoryFile::~InMemoryFileIO (numAllocs 74 numFrees 78
   0.49371335]
 
 
+
+
+
+(franka) ani@prosper:~/ARCap-main/data_processing$ python franka_real_robot_controller_v6.py --robot_ip 172.16.0.2
+pybullet build time: Jan 29 2025 23:16:28
+
+======================================================================
+ARCap + Franka
+机器人类型: Leap Hand(灵巧手)
+机器人IP: 172.16.0.2
+Quest IP: 10.195.180.39
+本地IP: 10.197.237.2
+更新频率: 30 Hz
+======================================================================
+
+正在初始化Franka控制器...
+连接Franka机器人 172.16.0.2...
+INFO: libfranka: Setting thread priority to the highest possible value.
+Initial joint positions: 0.122692 -0.104058 0.00637984 -1.82303 0.0372776 1.56583 0.493712 
+
+初始化Quest连接...
+
+======================================================================
+
+本地控制:
+  输入 'start'  - 移动到初始位置
+  输入 'follow' - 开始跟随模式
+  输入 'stop'   - 停止机器人
+  按 Ctrl+C    - 退出程序
+======================================================================
+
+wrist_tf=array([-0.5808604 , -0.276128  ,  0.04574391,  0.3032992 , -0.1686536 ,
+       -0.496125  ,  0.7958803 ]), head_tf=array([-0.0842723 , -0.02439474,  0.2629727 , -0.03696141, -0.5131245 ,
+       -0.03860597,  0.8566486 ])
+
+停止Franka控制器...
+INFO: Async position control stopped successfully.
+Error: InMemoryFile::~InMemoryFileIO (numAllocs 74 numFrees 78
+
+程序完成
+  收到数据包: 0
+  控制更新次数: 0
+  最终关节位置: [ 0.1226922  -0.10405834  0.00637984 -1.8230269   0.03727758  1.5658319
+  0.49371246]
+
+
+

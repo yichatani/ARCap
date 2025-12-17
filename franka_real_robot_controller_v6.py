@@ -168,43 +168,49 @@ def main():
     start_time = time.time()
 
     try:
-        while not killer.kill_now and not controller.has_error():
+        while not controller.has_error():
+            if killer.kill_now:
+                print("退出主循环")
+                break
             loop_start = time.time()
             elapsed = loop_start - start_time
 
             # 尝试接收Quest数据
             try:
                 wrist, head_pose = quest.receive()
-
-                if wrist is not None:
-                    wrist_pos = wrist[0]
-                    wrist_orn = Rotation.from_quat(wrist[1])
-                    head_pos = head_pose[0]
-                    head_orn = Rotation.from_quat(head_pose[1])
-                    hand_tip_pose = wrist_orn.apply(default_finger_positions) + wrist_pos
-
-                    if handedness == "right":
-                        hand_tip_pose[[0,1,2,3]] = hand_tip_pose[[1,2,3,0]]
-
-                    arm_q, hand_q, wrist_pos_out, wrist_orn_out = quest.solve_system_world(
-                        wrist_pos, wrist_orn, hand_tip_pose
-                    )
-
-                    action = quest.send_ik_result(arm_q, hand_q)
-
-                    if len(arm_q) >= 7:
-                        last_arm_q = np.array(arm_q[:7])
-                        data_count += 1
-
-                    # 统计
-                    # if data_count % 30 == 0:
-                    #     print(f"✓ 收到Quest数据: {data_count} 包 | 控制更新: {control_count} 次", end="\r")
-
             except socket.error:
                 pass
             except Exception as e:
+                if killer.kill_now:
+                    print("退出中，跳过 Quest 接收")
+                    break
                 if args.verbose:
-                    print(f"Quest处理错误: {e}")
+                    print(f"Quest 接收异常: {e}")
+            
+            if wrist is not None:
+                wrist_pos = wrist[0]
+                wrist_orn = Rotation.from_quat(wrist[1])
+                head_pos = head_pose[0]
+                head_orn = Rotation.from_quat(head_pose[1])
+                hand_tip_pose = wrist_orn.apply(default_finger_positions) + wrist_pos
+
+                if handedness == "right":
+                    hand_tip_pose[[0,1,2,3]] = hand_tip_pose[[1,2,3,0]]
+
+                arm_q, hand_q, wrist_pos_out, wrist_orn_out = quest.solve_system_world(
+                    wrist_pos, wrist_orn, hand_tip_pose
+                )
+
+                action = quest.send_ik_result(arm_q, hand_q)
+
+                if len(arm_q) >= 7:
+                    last_arm_q = np.array(arm_q[:7])
+                    data_count += 1
+
+                # 统计
+                # if data_count % 30 == 0:
+                #     print(f"✓ 收到Quest数据: {data_count} 包 | 控制更新: {control_count} 次", end="\r")
+
 
             # 控制逻辑
             if control_enabled and initial_target is not None:
@@ -262,9 +268,6 @@ def main():
             elapsed_loop = time.time() - loop_start
             sleep_time = max(0, dt - elapsed_loop)
             time.sleep(sleep_time)
-
-    except KeyboardInterrupt:
-        print("\n\n正在关闭...")
 
     finally:
         # 停止控制器

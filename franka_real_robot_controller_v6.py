@@ -75,6 +75,8 @@ def main():
                        help="选择机器人类型")
     parser.add_argument("--verbose", action="store_true",
                        help="启用详细日志")
+    parser.add_argument("--max_joint_change", type=float, default=0.1,
+                       help="最大关节角度变化阈值(弧度), 默认0.1")
     args = parser.parse_args()
 
     robot_ip = args.robot_ip
@@ -204,7 +206,20 @@ def main():
                 action = quest.send_ik_result(arm_q, hand_q)
 
                 if len(arm_q) >= 7:
-                    last_arm_q = np.array(arm_q[:7])
+                    new_arm_q = np.array(arm_q[:7])
+
+                    # 检查关节角度变化是否过大
+                    if last_arm_q is not None:
+                        joint_diff = np.abs(new_arm_q - last_arm_q)
+                        max_diff = np.max(joint_diff)
+
+                        if max_diff > args.max_joint_change:
+                            # 角度变化过大，不更新last_arm_q
+                            if args.verbose:
+                                print(f"\n警告: 关节角度变化过大 {max_diff:.3f} rad > {args.max_joint_change} rad, 忽略此更新")
+                            continue
+
+                    last_arm_q = new_arm_q
                     data_count += 1
 
                 # 统计

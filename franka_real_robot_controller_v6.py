@@ -213,10 +213,9 @@ def main():
                         joint_diff = np.abs(new_arm_q - last_arm_q)
                         max_diff = np.max(joint_diff)
 
-                        if max_diff > args.max_joint_change:
+                        if max_diff > args.max_joint_change and following_mode == True:
                             # 角度变化过大，不更新last_arm_q
-                            if args.verbose:
-                                print(f"\n警告: 关节角度变化过大 {max_diff:.3f} rad > {args.max_joint_change} rad, 忽略此更新")
+                            print(f"\n警告: 关节角度变化过大 {max_diff:.3f} rad > {args.max_joint_change} rad, 忽略此更新")
                             continue
 
                     last_arm_q = new_arm_q

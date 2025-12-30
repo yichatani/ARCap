@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """
-python franka_real_robot_controller_v7.py --robot_ip 172.16.0.2 --handedness left
-python franka_real_robot_controller_v7.py --robot_ip 172.16.0.2 --handedness right
+python franka_real_robot_controller_v7.py --handedness left
+python franka_real_robot_controller_v7.py --handedness right
 """
 
 import numpy as np
@@ -20,6 +20,34 @@ from std_msgs.msg import Float64MultiArray
 from ip_config import *
 from quest_robot_module import QuestRightArmLeapModule, QuestLeftArmGripperModule
 import pybullet as pb
+
+
+def transform_ar_to_real(position, quaternion):
+    """
+    Transform AR frame to real robot frame
+    Rotate -90 degrees around Z axis
+    AR Y axis -> Real X axis
+    """
+    # Position transformation
+    pos = np.array(position)
+    R_z = np.array([
+        [0, 1, 0],
+        [-1, 0, 0],
+        [0, 0, 1]
+    ])
+    real_pos = R_z @ pos
+
+    # Quaternion transformation (rotate -90 deg around Z)
+    # Rotation quaternion for -90 degrees around Z: [cos(-45°), 0, 0, sin(-45°)]
+    rot_quat = np.array([0.7071068, 0, 0, -0.7071068])  # [w, x, y, z]
+
+    ar_rotation = Rotation.from_quat(quaternion)
+    rot_rotation = Rotation.from_quat(rot_quat)
+
+    real_rotation = rot_rotation * ar_rotation
+    real_quat = real_rotation.as_quat()
+
+    return real_pos, real_quat
 
 
 class GracefulKiller:
@@ -119,7 +147,10 @@ def main():
 
                 if wrist is not None:
                     wrist_pos = wrist[0]
+                    print(f"末端位置{wrist[0]}")
                     wrist_orn = Rotation.from_quat(wrist[1])
+                    real_pos, real_quat = transform_ar_to_real(wrist[0], wrist[1])
+                    print(f"real pose:{real_pos}")
                     head_pos = head_pose[0]
                     head_orn = Rotation.from_quat(head_pose[1])
                     hand_tip_pose = wrist_orn.apply(default_finger_positions) + wrist_pos

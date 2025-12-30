@@ -147,10 +147,9 @@ def main():
 
                 if wrist is not None:
                     wrist_pos = wrist[0]
-                    print(f"末端位置{wrist[0]}")
                     wrist_orn = Rotation.from_quat(wrist[1])
                     real_pos, real_quat = transform_ar_to_real(wrist[0], wrist[1])
-                    print(f"real pose:{real_pos}")
+                    #print(f"real pose:{real_pos}")
                     head_pos = head_pose[0]
                     head_orn = Rotation.from_quat(head_pose[1])
                     hand_tip_pose = wrist_orn.apply(default_finger_positions) + wrist_pos
@@ -181,8 +180,8 @@ def main():
 
                 if following_mode:
                     # Following mode: send current wrist pose
-                    tx, ty, tz = wrist[0]
-                    qx, qy, qz, qw = wrist[1]
+                    tx, ty, tz = real_pos
+                    qx, qy, qz, qw = real_quat
                     width = 0.04
 
                     msg.data = [tx, ty, tz, qx, qy, qz, qw, width]
@@ -203,8 +202,8 @@ def main():
 
                 if user_input == 'start':
                     if last_arm_q is not None:
-                        itx,ity,itz = wrist[0]
-                        iqx, iqy, iqz, iqw = wrist[1]
+                        itx,ity,itz = real_pos
+                        iqx, iqy, iqz, iqw = real_quat
                         control_enabled = True
                         following_mode = False
                         print("\nMoving to initial position")

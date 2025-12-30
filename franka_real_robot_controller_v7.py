@@ -23,22 +23,16 @@ import pybullet as pb
 
 
 def transform_ar_to_real(position, quaternion):
-    """
-    Transform AR frame to real robot frame
-    Rotate 90 degrees clockwise around Z axis
-    AR Y axis -> Real X axis
-    """
     # Position transformation
     pos = np.array(position)
     R_z = np.array([
-        [0, -1, 0],
-        [1, 0, 0],
-        [0, 0, 1]
+        [0,  1, 0],
+        [-1, 0, 0],
+        [0,  0, 1]
     ])
     real_pos = R_z @ pos
 
-    # Quaternion transformation (rotate 90 deg clockwise around Z)
-    rot_quat = np.array([0.7071068, 0, 0, 0.7071068])  # [w, x, y, z]
+    rot_quat = np.array([0, 0, -0.7071068, 0.7071068])  # z轴 -90°
 
     ar_rotation = Rotation.from_quat(quaternion)
     rot_rotation = Rotation.from_quat(rot_quat)
